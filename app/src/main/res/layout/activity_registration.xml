@@ -49,7 +49,7 @@
                     android:layout_width="68dp"
                     android:layout_height="40dp"
                     android:background="@android:color/white"
-                    app:ccp_defaultNameCode="Au" />
+                    app:ccp_defaultNameCode="Pk" />
 
                 <EditText
                     android:id="@+id/phoneText"

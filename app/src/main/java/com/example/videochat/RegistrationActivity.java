@@ -17,6 +17,7 @@ import com.google.android.gms.tasks.Task;
 import com.google.firebase.FirebaseException;
 import com.google.firebase.auth.AuthResult;
 import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.auth.PhoneAuthCredential;
 import com.google.firebase.auth.PhoneAuthOptions;
 import com.google.firebase.auth.PhoneAuthProvider;
@@ -107,7 +108,7 @@ public class RegistrationActivity extends AppCompatActivity {
 
               @Override
               public void onVerificationFailed(@NonNull FirebaseException e) {
-                  Toast.makeText(RegistrationActivity.this, "Invalid Phone Number", Toast.LENGTH_SHORT).show();
+                  Toast.makeText(RegistrationActivity.this, "Please enter valid Phone Number", Toast.LENGTH_SHORT).show();
                  loadingBar.dismiss();
                   relativeLayout.setVisibility(View.VISIBLE);
                   continueAndNextBtn.setText("Continue");
@@ -131,6 +132,21 @@ public class RegistrationActivity extends AppCompatActivity {
                   Toast.makeText(RegistrationActivity.this, "Code Sent.", Toast.LENGTH_SHORT).show();
               }
           };
+
+
+    }
+
+    @Override
+    protected void  onStart() {
+
+        super.onStart();
+
+        FirebaseUser firebaseUser = FirebaseAuth.getInstance().getCurrentUser();
+        if(firebaseUser!=null){
+            Intent homeIntent = new Intent(RegistrationActivity.this,MainActivity.class);
+            startActivity(homeIntent);
+            finish();
+        }
 
 
     }
