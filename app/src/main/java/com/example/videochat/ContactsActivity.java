@@ -33,7 +33,7 @@ public class ContactsActivity extends AppCompatActivity {
     private DatabaseReference contactsRef,usersRef;
     private FirebaseAuth mAuth;
     private String currentUserID;
-    private String userName,profileImage="";
+    private String userName="",profileImage="",calledBy="";
 
 
 
@@ -99,6 +99,8 @@ public class ContactsActivity extends AppCompatActivity {
     @Override
     protected void onStart() {
         super.onStart();
+        
+        checkForReceivingCall();
 
         validateUser();
 
@@ -156,6 +158,26 @@ public class ContactsActivity extends AppCompatActivity {
 
     }
 
+    private void checkForReceivingCall() {
+        usersRef.child(currentUserID).child("Ringing")
+                .addValueEventListener(new ValueEventListener() {
+                    @Override
+                    public void onDataChange(@NonNull DataSnapshot snapshot) {
+                        if(snapshot.hasChild("ringing")){
+                            calledBy = snapshot.child("ringing").getValue().toString();
+                            Intent callingIntent = new Intent(ContactsActivity.this,CallingActivity.class);
+                            callingIntent.putExtra("visit_user_id",calledBy);
+                            startActivity(callingIntent);
+
+                        }
+                    }
+
+                    @Override
+                    public void onCancelled(@NonNull DatabaseError error) {
+
+                    }
+                });
+    }
 
 
     public static class ContactsViewHolder extends RecyclerView.ViewHolder {

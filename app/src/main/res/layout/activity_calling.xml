@@ -53,7 +53,7 @@
             android:layout_height="100dp"
             android:layout_marginRight="70dp"
             android:src="@drawable/make_call"
-            android:visibility=""/>
+            android:visibility="gone"/>
 
         <ImageView
             android:id="@+id/cancel_call"
