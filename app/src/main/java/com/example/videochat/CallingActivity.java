@@ -1,6 +1,7 @@
 package com.example.videochat;
 
 import android.content.Intent;
+import android.media.MediaPlayer;
 import android.os.Bundle;
 import android.view.View;
 import android.widget.ImageView;
@@ -28,6 +29,7 @@ public class CallingActivity extends AppCompatActivity {
     private String receiverUserID="",receiverUserName="",receiverUserImage="";
     private String senderUserID="",senderUserName="",senderUserImage="",checker="";
     private String callingID="",ringingID="";
+    private MediaPlayer mediaPlayer;
     DatabaseReference userRef;
 
 
@@ -40,6 +42,8 @@ public class CallingActivity extends AppCompatActivity {
         receiverUserID = getIntent().getExtras().get("visit_user_id").toString();
         userRef = FirebaseDatabase.getInstance().getReference().child("Users");
 
+        mediaPlayer = MediaPlayer.create(this,R.raw.ringing);
+
         nameContact = findViewById(R.id.name_calling);
         profileImage = findViewById(R.id.profile_image_calling);
         cancelCallBtn = findViewById(R.id.cancel_call);
@@ -48,69 +52,34 @@ public class CallingActivity extends AppCompatActivity {
         cancelCallBtn.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                checker = "Clicked" ;
+                mediaPlayer.stop();
+                checker = "clicked" ;
                 cancelCallingUser();
+            }
+        });
+        acceptCallBtn.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                mediaPlayer.stop();
+
+                final HashMap <String,Object> callPickUpMap = new HashMap<>();
+                callPickUpMap.put("picked","picked");
+                userRef.child(senderUserID).child("Ringing")
+                        .updateChildren(callPickUpMap)
+                        .addOnCompleteListener(new OnCompleteListener<Void>() {
+                            @Override
+                            public void onComplete(@NonNull Task<Void> task) {
+                                if(task.isComplete()){
+                                    Intent intent = new Intent(CallingActivity.this,VideoChatActivity.class);
+                                    startActivity(intent);
+                                }
+                            }
+                        });
             }
         });
 
         getAndSetUserProfile();
     }
-
-
-
-
-
-    @Override
-    protected void onStart() {
-        super.onStart();
-        userRef.child(receiverUserID)
-                 .addListenerForSingleValueEvent(new ValueEventListener() {
-            @Override
-            public void onDataChange(@NonNull DataSnapshot snapshot) {
-                if( !checker.equals("Clicked") && !snapshot.hasChild("Calling") && !snapshot.hasChild("Ringing"))
-                {
-                    final HashMap<String,Object > callingInfo  = new HashMap<>();
-
-                    callingInfo.put("calling",receiverUserID);
-
-                    userRef.child(senderUserID)
-                            .child("Calling")
-                            .updateChildren(callingInfo)
-                            .addOnCompleteListener(new OnCompleteListener<Void>() {
-                                @Override
-                                public void onComplete(@NonNull Task<Void> task) {
-                                    if(task.isSuccessful()){
-                                        final HashMap<String,Object > ringingInfo  = new HashMap<>();
-                                        ringingInfo.put("ringing",senderUserID);
-
-                                        userRef.child(receiverUserID).child("Ringing").updateChildren(ringingInfo);
-                                    }
-                                }
-                            });
-                }
-            }
-
-            @Override
-            public void onCancelled(@NonNull DatabaseError error) {
-
-            }
-        });
-        userRef.addValueEventListener(new ValueEventListener() {
-            @Override
-            public void onDataChange(@NonNull DataSnapshot snapshot) {
-                if (snapshot.child(senderUserID).hasChild("Ringing") && !snapshot.child(senderUserID).hasChild("Calling")  )
-                {
-                 acceptCallBtn.setVisibility(View.VISIBLE);
-                }
-            }
-
-            @Override
-            public void onCancelled(@NonNull DatabaseError error) {
-
-            }
-        });
-    }
-
     private void getAndSetUserProfile() {
         userRef.addValueEventListener(new ValueEventListener() {
             @Override
@@ -136,7 +105,71 @@ public class CallingActivity extends AppCompatActivity {
         });
     }
 
+    @Override
+    protected void onStart() {
+        super.onStart();
+        mediaPlayer.start();
+        userRef.child(receiverUserID)
+                 .addListenerForSingleValueEvent(new ValueEventListener() {
+            @Override
+            public void onDataChange(@NonNull DataSnapshot snapshot) {
+                if( !checker.equals("clicked") && !snapshot.hasChild("Calling") && !snapshot.hasChild("Ringing"))
+                {
+
+                    final HashMap<String,Object > callingInfo  = new HashMap<>();
+
+                    callingInfo.put("calling",receiverUserID);
+
+                    userRef.child(senderUserID)
+                            .child("Calling")
+                            .updateChildren(callingInfo)
+                            .addOnCompleteListener(new OnCompleteListener<Void>() {
+                                @Override
+                                public void onComplete(@NonNull Task<Void> task) {
+                                    if(task.isSuccessful()){
+                                        final HashMap<String,Object > ringingInfo  = new HashMap<>();
+                                        ringingInfo.put("ringing",senderUserID);
+
+                                        userRef
+                                                .child(receiverUserID)
+                                                .child("Ringing")
+                                                .updateChildren(ringingInfo);
+                                    }
+                                }
+                            });
+                }
+            }
+
+            @Override
+            public void onCancelled(@NonNull DatabaseError error) {
+
+            }
+        });
+        userRef.addValueEventListener(new ValueEventListener() {
+            @Override
+            public void onDataChange(@NonNull DataSnapshot snapshot) {
+                if (snapshot.child(senderUserID).hasChild("Ringing") && !snapshot.child(senderUserID).hasChild("Calling")  )
+                {
+                 acceptCallBtn.setVisibility(View.VISIBLE);
+                }
+                if(snapshot.child(receiverUserID).child("Ringing").hasChild("picked")){
+                    mediaPlayer.stop();
+                    Intent intent = new Intent(CallingActivity.this,VideoChatActivity.class);
+                    startActivity(intent);
+
+                }
+            }
+
+            @Override
+            public void onCancelled(@NonNull DatabaseError error) {
+
+            }
+        });
+    }
+
+
     private void cancelCallingUser() {
+        mediaPlayer.stop();
         //Sender Side
         userRef.child(senderUserID).child("Calling")
                 .addValueEventListener(new ValueEventListener() {
@@ -197,6 +230,7 @@ public class CallingActivity extends AppCompatActivity {
                                                 .addOnCompleteListener(new OnCompleteListener<Void>() {
                                                     @Override
                                                     public void onComplete(@NonNull Task<Void> task) {
+                                                        mediaPlayer.stop();
                                                         startActivity(new Intent(CallingActivity.this, RegistrationActivity.class));
                                                         finish();
                                                     }
@@ -206,6 +240,7 @@ public class CallingActivity extends AppCompatActivity {
                             });
                 }
                 else {
+                    mediaPlayer.stop();
                     startActivity(new Intent(CallingActivity.this, RegistrationActivity.class));
                     finish();
                 }            }
