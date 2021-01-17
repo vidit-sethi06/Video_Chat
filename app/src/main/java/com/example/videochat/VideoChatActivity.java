@@ -64,6 +64,7 @@ public class VideoChatActivity extends AppCompatActivity
                 usersRef.addValueEventListener(new ValueEventListener() {
                     @Override
                     public void onDataChange(@NonNull DataSnapshot snapshot) {
+                        Log.i("LOG_TAG","Call Canceled");
                         if(snapshot.child(userId).hasChild("Ringing")){
                             usersRef.child(userId).child("Ringing").removeValue();
                             if(mPublisher!=null){
@@ -72,19 +73,21 @@ public class VideoChatActivity extends AppCompatActivity
                             if(mSubscriber!=null){
                                 mSubscriber.destroy();
                             }
-                            startActivity(new Intent(VideoChatActivity.this,RegistrationActivity.class));
                             finish();
+                            startActivity(new Intent(VideoChatActivity.this,RegistrationActivity.class));
+
                         }
                         if(snapshot.child(userId).hasChild("Calling")){
                             usersRef.child(userId).child("Calling").removeValue();
-                            startActivity(new Intent(VideoChatActivity.this,RegistrationActivity.class));
-                            finish();
+
                             if(mPublisher!=null){
                                 mPublisher.destroy();
                             }
                             if(mSubscriber!=null){
                                 mSubscriber.destroy();
                             }
+                            finish();
+                            startActivity(new Intent(VideoChatActivity.this,RegistrationActivity.class));
                         }
                         else {
                             if(mPublisher!=null){
@@ -93,8 +96,9 @@ public class VideoChatActivity extends AppCompatActivity
                             if(mSubscriber!=null){
                                 mSubscriber.destroy();
                             }
-                            startActivity(new Intent(VideoChatActivity.this,RegistrationActivity.class));
                             finish();
+                            startActivity(new Intent(VideoChatActivity.this,RegistrationActivity.class));
+
 
                         }
 
@@ -185,6 +189,10 @@ public class VideoChatActivity extends AppCompatActivity
         if(mSubscriber != null){
             mSubscriber = null;
             mSubscriberView.removeAllViews();
+        }
+        if(mPublisher != null){
+            mPublisher = null;
+            mPublisherView.removeAllViews();
         }
     }
 

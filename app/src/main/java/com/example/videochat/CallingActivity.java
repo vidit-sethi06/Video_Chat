@@ -108,7 +108,7 @@ public class CallingActivity extends AppCompatActivity {
     @Override
     protected void onStart() {
         super.onStart();
-        mediaPlayer.start();
+        checker="";
         userRef.child(receiverUserID)
                  .addListenerForSingleValueEvent(new ValueEventListener() {
             @Override
@@ -150,6 +150,7 @@ public class CallingActivity extends AppCompatActivity {
             public void onDataChange(@NonNull DataSnapshot snapshot) {
                 if (snapshot.child(senderUserID).hasChild("Ringing") && !snapshot.child(senderUserID).hasChild("Calling")  )
                 {
+                 mediaPlayer.start();
                  acceptCallBtn.setVisibility(View.VISIBLE);
                 }
                 if(snapshot.child(receiverUserID).child("Ringing").hasChild("picked")){
@@ -190,8 +191,8 @@ public class CallingActivity extends AppCompatActivity {
                                                 .addOnCompleteListener(new OnCompleteListener<Void>() {
                                                     @Override
                                                     public void onComplete(@NonNull Task<Void> task) {
-                                                        startActivity(new Intent(CallingActivity.this, RegistrationActivity.class));
                                                         finish();
+                                                        startActivity(new Intent(CallingActivity.this, RegistrationActivity.class));
                                                     }
                                                 });
                                     }
@@ -199,8 +200,8 @@ public class CallingActivity extends AppCompatActivity {
                             });
                 }
                 else {
-                    startActivity(new Intent(CallingActivity.this, RegistrationActivity.class));
                     finish();
+                    startActivity(new Intent(CallingActivity.this, RegistrationActivity.class));
                 }            }
 
             @Override
@@ -231,8 +232,9 @@ public class CallingActivity extends AppCompatActivity {
                                                     @Override
                                                     public void onComplete(@NonNull Task<Void> task) {
                                                         mediaPlayer.stop();
-                                                        startActivity(new Intent(CallingActivity.this, RegistrationActivity.class));
                                                         finish();
+                                                        startActivity(new Intent(CallingActivity.this, RegistrationActivity.class));
+
                                                     }
                                                 });
                                     }
@@ -241,8 +243,8 @@ public class CallingActivity extends AppCompatActivity {
                 }
                 else {
                     mediaPlayer.stop();
-                    startActivity(new Intent(CallingActivity.this, RegistrationActivity.class));
                     finish();
+                    startActivity(new Intent(CallingActivity.this, RegistrationActivity.class));
                 }            }
 
             @Override
